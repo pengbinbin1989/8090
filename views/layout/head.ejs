@@ -1,0 +1,15 @@
+	<meta charset="utf-8">
+	<title><%= head.title%></title>
+	<meta name="viewport" content="width=device-width, user-scalable=yes">
+	<meta name="keywords" content="">
+	<meta name="description" content="">
+	<meta name="author" content="Peng BinBin">
+	<meta name="robots" content="index,follow">
+<% var link = head.link %>
+	<!-- initialization Css -->
+<% for( var i = 0; i < link.length; i++) {%>
+	<link rel="stylesheet" type="text/css" href="/stylesheets<%= link[i].href%>">
+<% } %>
+	<!-- initialization Js -->
+	<script type="text/javascript" src="/javascripts/format.js"></script>
+	
