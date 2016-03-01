@@ -8,7 +8,7 @@
 	<script type="text/javascript">
 		(function(){
 			var root = this;
-			getLocation();
+			// getLocation();
 			function getLocation() {
 				if (navigator.geolocation) {
 					navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
@@ -16,58 +16,67 @@
 					errorCallback();
 				}
 			};
+			var position = {
+				"coords":{
+					"latitude":22.1975410000,
+					"longitude":113.5589330000
+				},
+				"name":"澳门特别行政区澳门半岛白头马路2"
+			};
+			successCallback(position);
 			function successCallback(position) {
-				var Ajax_msg = store().ajax({
-					url:'/',
-					style:"POST",
-					Boole:false,
-					data:{
-						latlng:position.coords.latitude + "," + position.coords.longitude
+				store().ajax({
+					"url":"/",
+					"style":"POST",
+					"Boole":true,
+					"data":{
+						"latlng":position.coords.latitude + "," + position.coords.longitude
+					},
+					"success":function(msg){
+						getWeatherMsg(msg)
 					}
 				});
-				var weatherMsg = JSON.parse(unescape(Ajax_msg.replace(/\\/g, "%")));
-				/*{
-				errNum: 0,
-				errMsg: "success",
-				retData: {
-				   city: "北京", //城市
-				   pinyin: "beijing", //城市拼音
-				   citycode: "101010100",  //城市编码	
-				   date: "15-02-11", //日期
-				   time: "11:00", //发布时间
-				   postCode: "100000", //邮编
-				   longitude: 116.391, //经度
-				   latitude: 39.904, //维度
-				   altitude: "33", //海拔	
-				   weather: "晴",  //天气情况
-				   temp: "10", //气温
-				   l_tmp: "-4", //最低气温
-				   h_tmp: "10", //最高气温
-				   WD: "无持续风向",	 //风向
-				   WS: "微风(<10m/h)", //风力
-				   sunrise: "07:12", //日出时间
-				   sunset: "17:44" //日落时间
-				  }    
-				}*/
-				alert(weatherMsg);
 			};
 			function errorCallback(){
-				root.getip = function (result) {
-					var Ajax_msg = store().ajax({
-						url:'/',
-						style:"POST",
-						Boole:false,
-						data:{
-							IP:result.ip
+				var JSONP = document.createElement("script");
+				JSONP.type = "text/javascript";
+				JSONP.src = "http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=js";  
+				document.getElementsByTagName("head")[0].appendChild(JSONP); 
+				JSONP.onload = function(){
+					store().ajax({
+						"url":'/',
+						"style":"POST",
+						"Boole":true,
+						"data":{
+							"province": remote_ip_info.province,
+							"cityName": remote_ip_info.city,
+							"district": remote_ip_info.district,
+							"address": remote_ip_info.province+remote_ip_info.city+remote_ip_info.district
+						},
+						"success":function(msg){
+							getWeatherMsg(msg)
 						}
 					});
-					var weatherMsg = JSON.parse(unescape(Ajax_msg.replace(/\\/g, "%")));
-					console.log(weatherMsg);
-				};
-				var JSONP = document.createElement("script");  
-				JSONP.type = "text/javascript";
-				JSONP.src = "https://api.ipify.org?format=jsonp&callback=getip";  
-				document.getElementsByTagName("head")[0].appendChild(JSONP); 
+				}
+			}
+			function getWeatherMsg(Ajax_msg){
+				Ajax_msg = JSON.parse(Ajax_msg);
+				store().setCookie("cityCode",Ajax_msg.cityCode);
+				store().ajax({
+					"url":"http://wthrcdn.etouch.cn/weather_mini?citykey=" + Ajax_msg.cityCode,
+					"style":"GET",
+					"Boole":true,
+					"success": function(msg){
+						console.log(JSON.parse(msg));
+					}
+				});
+			}
+			// weather
+			// showWeather()
+			function showWeather(){
+				var weatherMsg = JSON.parse(store().getCookie("weather"));
+				console.log(weatherMsg);
+				store().weather(weatherMsg.weather,weatherMsg);
 			}
 		}).call(this);
 	</script>
